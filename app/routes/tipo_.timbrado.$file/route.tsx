@@ -25,12 +25,7 @@ const DepartmentContent = () => {
             </Button>
           ))}
       </div>
-
-      {/* Renderizamos el contenido dinámico en el Outlet */}
-      <div className="mt-4">
-        {/* Pasamos las rutas del departamento seleccionado al contexto del Outlet */}
-        <Outlet />
-      </div>
+      <Outlet />
     </>
   );
 };
