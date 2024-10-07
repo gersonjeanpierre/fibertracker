@@ -18,7 +18,7 @@ export default function TimbradoPage() {
 
 function TimbradoContent() {
   const navigate = useNavigate();
-  const { setFilename } = useTimbrado(); // Usa el contexto
+  const { filename, setFilename } = useTimbrado(); // Usa el contexto
 
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return;
@@ -54,7 +54,7 @@ function TimbradoContent() {
           className="mb-4"
         />
       </div>
-      <Button onClick={() => navigate("./test")}>Test</Button>
+      <Button onClick={() => navigate(`./${filename}`)}>Test</Button>
       <Outlet />
     </>
   );
