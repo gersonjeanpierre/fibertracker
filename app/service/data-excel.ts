@@ -120,7 +120,7 @@ export const updateCtoData = async (
     // Buscar y actualizar el CTO
     let ctoUpdated = false;
     data.map((department) => {
-      const rutas = department.rutas.map((route) => {
+      const rutas = department.routes.map((route) => {
         const ctos = route.ctos.map((cto) => {
           if (cto.cto === ctoId) {
             console.log("CTO ENCONTRADO #####################", cto);
@@ -131,7 +131,7 @@ export const updateCtoData = async (
         });
         return { ...route, ctos };
       });
-      dataUpdated.push({ ...department, rutas });
+      dataUpdated.push({ ...department, routes: rutas });
     });
 
     if (!ctoUpdated) {
