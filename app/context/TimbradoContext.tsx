@@ -1,3 +1,4 @@
+// context/TimbradoContext.tsx
 import { useNavigate, useParams } from "@remix-run/react";
 import {
   createContext,
@@ -7,17 +8,17 @@ import {
   ReactNode,
   useCallback,
 } from "react";
-import { Department } from "~/interface/timbrado"; // Ajusta según tu estructura
-import { getDataByKey, getAllKeys } from "~/service/data-excel"; // Asegúrate de importar getAllKeys
+import { Department } from "~/interface/timbrado";
+import { getDataByKey, getAllKeys } from "~/service/data-excel";
 
 interface TimbradoContextType {
   filename: string;
   setFilename: (name: string) => void;
   data: Department[] | null;
   setData: (data: Department[]) => void;
-  reloadData: () => void;
   keys: string[];
   setKeys: (keys: string[]) => void;
+  reloadData: () => void;
 }
 
 const TimbradoContext = createContext<TimbradoContextType | undefined>(
@@ -39,15 +40,16 @@ export const TimbradoProvider = ({ children }: { children: ReactNode }) => {
   const { file } = useParams();
   const navigate = useNavigate();
 
-  const loadLastKey = async () => {
+  // Función para cargar el último key de IndexedDB
+  const loadLastKey = useCallback(async () => {
     try {
-      const keys = await getAllKeys();
-      if (keys.length > 0) {
-        const lastKey = keys[keys.length - 1];
-        // setFilename(lastKey === file ? lastKey : file || "");
+      const dbKeys = await getAllKeys();
+      setKeys(dbKeys); // Guarda las claves disponibles en el estado
+      if (dbKeys.length > 0) {
+        const lastKey = dbKeys[dbKeys.length - 1];
         if (file) {
-          // navigate(`./${file}`);
-          return setFilename(file);
+          setFilename(file);
+          return; // Ya se ha especificado un file en la URL, no necesitamos continuar
         }
         setFilename(lastKey);
         navigate(`./${lastKey}`);
@@ -62,18 +64,7 @@ export const TimbradoProvider = ({ children }: { children: ReactNode }) => {
         error
       );
     }
-  };
-
-  const loadKeys = async () => {
-    try {
-      const dbKeys = await getAllKeys();
-      setKeys(dbKeys);
-      return dbKeys;
-    } catch (error) {
-      console.error("Error al cargar las claves de IndexedDB:", error);
-      return [];
-    }
-  };
+  }, [file, navigate]);
 
   const reloadData = useCallback(async () => {
     if (filename) {
@@ -88,14 +79,14 @@ export const TimbradoProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [filename]);
 
+  // Efecto para cargar los datos cuando se monta el componente o cambia el filename
   useEffect(() => {
     if (!filename) {
-      loadLastKey(); // Cargar el último key cuando no hay un filename seleccionado
-      loadKeys(); // Cargar las claves de la base de datos
+      loadLastKey(); // Solo carga el último key si no hay un filename
     } else {
-      reloadData();
+      reloadData(); // Recarga los datos cuando cambia el filename
     }
-  }, [filename]);
+  }, [filename, loadLastKey, reloadData]);
 
   return (
     <TimbradoContext.Provider

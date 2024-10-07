@@ -32,7 +32,7 @@ export const transformData = (fileData: ArrayBuffer) => {
         timbrado: [],
       }));
       return {
-        ruta: cleanCell(String(row[0])),
+        route: cleanCell(String(row[0])),
         gestor: cleanCell(String(row[1])),
         tecnico: cleanCell(String(row[2])).toUpperCase(),
         ctos: ctos,
@@ -40,8 +40,8 @@ export const transformData = (fileData: ArrayBuffer) => {
     });
 
     dataRuta.push({
-      departamento: sheetName,
-      rutas: rutas,
+      department: sheetName,
+      routes: rutas,
     });
   });
 

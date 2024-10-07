@@ -1,10 +1,10 @@
 export interface Department {
-  departamento: string;
-  rutas: Array<Route>;
+  department: string;
+  routes: Array<Route>;
 }
 
 export interface Route {
-  ruta: string;
+  route: string;
   gestor: string;
   tecnico: string;
   ctos: Array<Cto>;
