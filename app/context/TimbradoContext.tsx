@@ -1,4 +1,4 @@
-// context/TimbradoContext.tsx
+import { useNavigate, useParams } from "@remix-run/react";
 import {
   createContext,
   useContext,
@@ -16,6 +16,8 @@ interface TimbradoContextType {
   data: Department[] | null;
   setData: (data: Department[]) => void;
   reloadData: () => void;
+  keys: string[];
+  setKeys: (keys: string[]) => void;
 }
 
 const TimbradoContext = createContext<TimbradoContextType | undefined>(
@@ -25,7 +27,7 @@ const TimbradoContext = createContext<TimbradoContextType | undefined>(
 export const useTimbrado = () => {
   const context = useContext(TimbradoContext);
   if (!context) {
-    throw new Error("useTimbrado must be used within a TimbradoProvider");
+    throw new Error("useTimbrado debe ser usado dentro de un TimbradoProvider");
   }
   return context;
 };
@@ -33,13 +35,22 @@ export const useTimbrado = () => {
 export const TimbradoProvider = ({ children }: { children: ReactNode }) => {
   const [filename, setFilename] = useState<string>("");
   const [data, setData] = useState<Department[] | null>(null);
+  const [keys, setKeys] = useState<string[]>([]);
+  const { file } = useParams();
+  const navigate = useNavigate();
 
   const loadLastKey = async () => {
     try {
       const keys = await getAllKeys();
       if (keys.length > 0) {
         const lastKey = keys[keys.length - 1];
+        // setFilename(lastKey === file ? lastKey : file || "");
+        if (file) {
+          // navigate(`./${file}`);
+          return setFilename(file);
+        }
         setFilename(lastKey);
+        navigate(`./${lastKey}`);
         const storedData = await getDataByKey(lastKey);
         if (storedData) {
           setData(storedData as Department[]);
@@ -50,6 +61,17 @@ export const TimbradoProvider = ({ children }: { children: ReactNode }) => {
         "Error al cargar el último key de la base de datos:",
         error
       );
+    }
+  };
+
+  const loadKeys = async () => {
+    try {
+      const dbKeys = await getAllKeys();
+      setKeys(dbKeys);
+      return dbKeys;
+    } catch (error) {
+      console.error("Error al cargar las claves de IndexedDB:", error);
+      return [];
     }
   };
 
@@ -69,14 +91,23 @@ export const TimbradoProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!filename) {
       loadLastKey(); // Cargar el último key cuando no hay un filename seleccionado
+      loadKeys(); // Cargar las claves de la base de datos
     } else {
       reloadData();
     }
-  }, [filename, reloadData]);
+  }, [filename]);
 
   return (
     <TimbradoContext.Provider
-      value={{ filename, setFilename, data, setData, reloadData }}
+      value={{
+        filename,
+        setFilename,
+        data,
+        setData,
+        keys,
+        setKeys,
+        reloadData,
+      }}
     >
       {children}
     </TimbradoContext.Provider>
