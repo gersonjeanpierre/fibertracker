@@ -15,10 +15,9 @@ export default function Index() {
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
         FiberTracker
       </h1>
-      <Link to="./tipo">
+      <Link to="/tipo">
         <Button>Ingresar</Button>
       </Link>
     </div>
   );
 }
-

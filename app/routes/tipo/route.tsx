@@ -13,7 +13,7 @@ export default function Work() {
           <CubeIcon className="mr-2 h-4 w-4" />
           HGU
         </Button>
-        <Link to="./timbrado">
+        <Link to="timbrado">
           <Button>
             <DesktopIcon className="mr-2 h-4 w-4" />
             Timbrado
