@@ -1,5 +1,6 @@
 import { CubeIcon, DesktopIcon } from "@radix-ui/react-icons";
 import { Link } from "@remix-run/react";
+import { Unplug } from "lucide-react";
 import { Button } from "~/components/ui/button";
 
 export default function Work() {
@@ -13,9 +14,15 @@ export default function Work() {
           <CubeIcon className="mr-2 h-4 w-4" />
           HGU
         </Button>
-        <Link to="timbrado">
+        <Link to="/timbrado">
           <Button>
             <DesktopIcon className="mr-2 h-4 w-4" />
+            Timbrado
+          </Button>
+        </Link>
+        <Link to="/timba">
+          <Button>
+            <Unplug className="mr-2 h-4 w-4" />
             Timbrado
           </Button>
         </Link>

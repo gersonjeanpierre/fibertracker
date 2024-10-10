@@ -1,4 +1,4 @@
-import { Outlet, useParams } from "@remix-run/react";
+import { Outlet, useNavigate, useParams } from "@remix-run/react";
 import { useTimbrado } from "~/context/TimbradoContext";
 import { initRouteId } from "./route-utils";
 import { Button } from "~/components/ui/button";
@@ -6,16 +6,16 @@ import { Button } from "~/components/ui/button";
 const RouteContent = () => {
   const { data } = useTimbrado();
   const { location, route } = useParams();
+  const navigate = useNavigate();
   const routesList = data?.find((data) => data.department === location)?.routes;
 
   const selectRoute = routesList?.find(
     (department) => route && department.route === initRouteId(route)
   );
-  console.log("selectRoute", selectRoute);
-
   const handleCto = (cto: string) => {
-    console.log("cto", cto);
+    navigate(`./${cto}`);
   };
+
   return (
     <>
       <h1>Testeando Contenido ctos</h1>

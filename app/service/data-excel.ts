@@ -103,16 +103,16 @@ export const clearData = async () => {
 };
 
 export const updateCtoData = async (
-  key: string,
+  file: string,
   ctoId: string,
   updatedData: Partial<Cto>
 ) => {
   try {
     // Obtener los datos por la clave
-    const data = (await getDataByKey(key)) as Department[];
+    const data = (await getDataByKey(file)) as Department[];
 
     if (!data) {
-      throw new Error(`No se encontraron datos para la clave ${key}`);
+      throw new Error(`No se encontraron datos para la clave ${file}`);
     }
     console.log("DATA SERVICE #####################", data);
     const dataUpdated = Array<Department>();
@@ -141,7 +141,7 @@ export const updateCtoData = async (
     console.log("DATA ACTUALIZADA #####################", dataUpdated);
 
     // Guardar los datos actualizados nuevamente en IndexedDB
-    await saveDataByKey(key, dataUpdated);
+    await saveDataByKey(file, dataUpdated);
 
     return `CTO con ID ${ctoId} actualizado correctamente.`;
   } catch (error) {
