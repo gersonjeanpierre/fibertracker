@@ -143,7 +143,7 @@ export const updateCtoData = async (
     // Guardar los datos actualizados nuevamente en IndexedDB
     await saveDataByKey(file, dataUpdated);
 
-    return `CTO con ID ${ctoId} actualizado correctamente.`;
+    return dataUpdated;
   } catch (error) {
     console.error("Error actualizando el CTO:", error);
     if (error instanceof Error) {
