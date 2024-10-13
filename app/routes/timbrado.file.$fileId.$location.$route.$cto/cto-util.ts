@@ -1,5 +1,5 @@
 import { Department } from "~/interface/timbrado";
-import { initRouteId } from "../timbrado.$file.$location.$route/route-utils";
+import { initRouteId } from "../timbrado.file.$fileId.$location/location-utils";
 
 export const findCto = (
   data: Department[],
@@ -7,8 +7,10 @@ export const findCto = (
   route: string,
   cto: string
 ) => {
-  const dept = data?.find((d) => d.department === location);
-  const routeData = dept?.routes?.find(
+  const dept = Array.isArray(data)
+    ? data?.find((d) => d.department === location) || { routes: [] }
+    : { routes: [] };
+  const routeData = dept.routes?.find(
     (r) => r.route === initRouteId(route || "")
   );
   const selectCto = routeData?.ctos?.find((c) => c.cto === cto);

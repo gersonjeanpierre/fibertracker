@@ -1,100 +1,111 @@
-// app/routes/timbrado.tsx
-import { ResetIcon } from "@radix-ui/react-icons";
-import { Outlet, useNavigate } from "@remix-run/react";
-import { ChangeEvent } from "react";
+import { useState, useRef, useEffect } from "react";
+import {
+  FileIcon,
+  LayoutDashboardIcon,
+  MapPinIcon,
+  BoxIcon,
+  MenuIcon,
+  DatabaseIcon,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { transformData } from "./xlsx"; // Ajusta la ruta del archivo
-import { getAllKeys, getDataByKey, saveDataByKey } from "~/service/data-excel";
-import { TimbradoProvider, useTimbrado } from "~/context/TimbradoContext";
-import { Department } from "~/interface/timbrado";
+import { Outlet, useNavigate, useParams } from "@remix-run/react";
 
-export default function TimbradoPage() {
-  return (
-    <TimbradoProvider>
-      <TimbradoContent />
-    </TimbradoProvider>
-  );
-}
-function TimbradoContent() {
+const transformData = (data: ArrayBuffer) => {
+  // Mock implementation
+  console.log("Transforming data:", data);
+  return [];
+};
+
+const saveDataByKey = async (key: string, data: any) => {
+  // Mock implementation
+  console.log("Saving data:", key, data);
+};
+
+const getAllKeys = async () => {
+  // Mock implementation
+  return ["File 1", "File 2", "File 3"];
+};
+
+export default function Component() {
   const navigate = useNavigate();
-  const { filename, setFilename, setData, keys, setKeys } = useTimbrado();
+  const params = useParams();
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeNavItem, setActiveNavItem] = useState("Dashboard");
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // Manejo de la carga de archivos
-  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files) return;
-
-    const file = event.target.files[0];
-    const name = file.name.split(".")[0];
-    const rawFileData = await file.arrayBuffer();
-
-    try {
-      // Transformar el archivo en JSON
-      const dataFile = transformData(rawFileData);
-
-      // Guardar los datos en IndexedDB con el nombre del archivo como clave
-      await saveDataByKey(name, dataFile);
-
-      // Actualizar el estado global
-      setFilename(name);
-      setData(dataFile);
-
-      // Obtener todas las claves de IndexedDB (incluyendo la recién añadida)
-      const updatedKeys = await getAllKeys();
-      setKeys(updatedKeys); // Actualizar las claves disponibles en el estado
-
-      console.log("Datos cargados correctamente:", dataFile);
-    } catch (error) {
-      console.error("Error al procesar el archivo:", error);
-    }
-  };
-
-  const handleKeySelect = async (fileName: string) => {
-    try {
-      const data = (await getDataByKey(fileName)) as Department[];
-      if (data) {
-        setData(data);
-        setFilename(fileName);
-        navigate(`./${fileName}`);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
+        setIsSidebarOpen(false);
       }
-    } catch (error) {
-      console.error("Error al cargar datos de IndexedDB:", error);
-    }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const navItems = [
+    { name: "Dashboard", icon: LayoutDashboardIcon },
+    { name: "File", icon: FileIcon },
+    { name: "Up Data OLT", icon: DatabaseIcon },
+    // { name: "CTOs", icon: BoxIcon },
+  ];
+
+  const activeNavContent = (name: string) => {
+    setActiveNavItem(name);
+    navigate(`${name}`);
   };
-
+  console.log("params", params);
   return (
-    <div className="container mx-auto mt-4">
-      <div className="flex gap-3">
-        <h1 className="text-4xl mb-4 font-bold">Subir el Excel de rutas</h1>
-        <Button onClick={() => navigate(-1)}>
-          <ResetIcon className="mr-2 h-4 w-4" />
-          Regresar
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
+      <div
+        ref={sidebarRef}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:relative md:translate-x-0`}
+      >
+        <div className="p-4">
+          <h1 className="text-2xl font-bold mb-4">Timbrado Dashboard</h1>
+          <nav>
+            {navItems.map((item) => (
+              <Button
+                key={item.name}
+                variant={activeNavItem === item.name ? "default" : "ghost"}
+                className={`w-full justify-start mb-2 ${
+                  activeNavItem === item.name
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                }`}
+                onClick={() => activeNavContent(item.name.split(" ").join(""))}
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.name}
+              </Button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 p-8 overflow-auto">
+        <Button
+          variant="outline"
+          size="icon"
+          className="md:hidden mb-4"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          <MenuIcon className="h-4 w-4" />
         </Button>
-      </div>
 
-      <Input
-        type="file"
-        onChange={handleFileUpload}
-        accept=".xlsx"
-        className="mb-4"
-      />
-
-      <div className="flex flex-wrap gap-2">
-        {keys.length === 0 ? (
-          <p>No hay archivos cargados.</p>
-        ) : (
-          keys.map((key) => (
-            <Button
-              key={key}
-              onClick={() => handleKeySelect(key)}
-              variant={filename === key ? "default" : "outline"}
-            >
-              {key}
-            </Button>
-          ))
-        )}
+        <Outlet />
       </div>
-      <Outlet />
     </div>
   );
 }
