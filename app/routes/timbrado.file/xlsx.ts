@@ -38,6 +38,13 @@ export const transformData = (fileData: ArrayBuffer) => {
             divisor: "",
             mcomentario: "",
             mcomentario_2: "",
+            oltA: "",
+            slotA: "",
+            portA: "",
+            oltB: "",
+            slotB: "",
+            portB: "",
+            activeBornes: [],
             timbrado: [],
           };
         })

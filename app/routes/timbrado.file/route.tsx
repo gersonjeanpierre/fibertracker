@@ -3,7 +3,6 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { transformData } from "./xlsx";
 import { getAllKeys, getDataByKey, saveDataByKey } from "~/service/data-excel";
-import { useState } from "react";
 import { Outlet, useNavigate } from "@remix-run/react";
 import { TimbradoProvider, useTimbrado } from "~/context/TimbaContetext";
 import { Department } from "~/interface/timbrado";
@@ -88,7 +87,7 @@ const FileContent = () => {
           </CardContent>
         </Card>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-2  gap-2">
         <Outlet />
       </div>
     </>

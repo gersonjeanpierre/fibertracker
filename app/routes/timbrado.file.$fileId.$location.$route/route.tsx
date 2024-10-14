@@ -63,17 +63,20 @@ const CtoMono = () => {
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("class", "rounded-md shadow-md bg-white")
+      .attr("class", "rounded-md shadow-md bg-white p-5")
       .append("g")
       .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
     // Utilizando los colores de Tailwind CSS
-    const color = d3.scaleOrdinal([
-      "rgba(74, 222, 128, 1)", // Tailwind green-500
-      "rgba(234, 179, 8, 1)", // Tailwind yellow-500
-      "rgba(239, 68, 68, 1)", // Tailwind red-500
-      "rgba(75, 85, 99, 1)", // Tailwind gray-500
-    ]);
+    const color = d3
+      .scaleOrdinal()
+      .domain(["TIMBRADO", "EN PROCESO", "SIN ACCESO", "NO TIMBRADO"])
+      .range([
+        "rgba(74, 222, 128, 1)", // Tailwind green-500 para "TIMBRADO"
+        "rgba(234, 179, 8, 1)", // Tailwind yellow-500 para "EN PROCESO"
+        "rgba(239, 68, 68, 1)", // Tailwind red-500 para "SIN ACCESO"
+        "rgba(75, 85, 99, 1)", // Tailwind gray-500 para "NO TIMBRADO"
+      ]);
 
     const pie = d3
       .pie()
@@ -223,33 +226,37 @@ const CtoMono = () => {
       .attr("x", legendRectSize + legendSpacing)
       .attr("y", legendRectSize - legendSpacing)
       .text((d: any) => d);
-  }, [selectRoute?.ctos]);
+  }, [selectRoute?.ctos, groupCtosByState]);
+  const groupedCtos = groupCtosByState();
 
   return (
     <>
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>CTO Selection</CardTitle>
-        </CardHeader>
+      <Card>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {selectRoute?.ctos.map((cto, index) => (
-              <Button
-                key={index}
-                className="active:bg-green-600 focus:bg-green-600"
-                onClick={() => handleCto(cto.cto)}
-                variant="outline"
-              >
-                {cto.cto}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-        <CardFooter>
-          <div ref={chartRef} className="flex justify-center w-full"></div>
-        </CardFooter>
-      </Card>
+          {/* Itera sobre los estados */}
+          {groupedCtos &&
+            Object.keys(groupedCtos).map((state) => (
+              <div key={state} className="first:mt-5">
+                <CardTitle className=" pt-3">{state}</CardTitle>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {/* Renderiza los CTOs agrupados por estado */}
 
+                  {groupedCtos[state].map((cto, index) => (
+                    <Button
+                      key={index}
+                      className="active:bg-green-600 focus:bg-green-600"
+                      onClick={() => handleCto(cto.cto)}
+                      variant="outline"
+                    >
+                      {cto.cto}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ))}
+        </CardContent>
+      </Card>
+      <div ref={chartRef} className="flex justify-center"></div>
       <Outlet />
     </>
   );

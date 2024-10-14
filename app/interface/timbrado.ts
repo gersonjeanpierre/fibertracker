@@ -1,13 +1,13 @@
 export interface Department {
   department: string;
-  routes: Array<Route>;
+  routes: Route[];
 }
 
 export interface Route {
   route: string;
   gestor: string;
   tecnico: string;
-  ctos: Array<Cto>;
+  ctos: Cto[];
 }
 
 export interface Cto {
@@ -18,12 +18,39 @@ export interface Cto {
   divisor: string;
   mcomentario: string;
   mcomentario_2: string;
-  timbrado?: Array<TimbradoData>;
+  oltA: string;
+  slotA: number;
+  portA: number;
+  oltB: string;
+  slotB: number;
+  portB: number;
+  activeBornes: number[];
+  bornes?: DataBornes[];
 }
 
-export interface TimbradoData {
-  cto: string;
+export interface DataBornes {
   borne: string;
+  lineIdInicial: string;
+  vnoCodeInicial: string;
+  olt: string;
+  slot: number;
+  port: number;
+  onuInicial: number;
+  estadoInicial: string;
+  onuFinal: number;
+  estadoEnCampoInicial: string;
+  estadoEnCampoFinal: string;
+  potenciaAntes: number;
+  potenciaDespues: number;
+  potenciaCampo: number;
+  lineIdFinal: string;
+  vnoCodeFinal: string;
+  comentario: string;
+  ctoEnCampo: string;
+}
+export interface ExcelTimbradoCto {
+  cto: string;
+  borne: number;
   lineIdInicial: string;
   vnoCodeInicial: string;
   olt: string;
@@ -44,8 +71,8 @@ export interface TimbradoData {
   ctoEnCampo: string;
   zona: string;
   grupo: string;
-  fecha: Date;
-  horaInicio: Date;
-  horaCierre: Date;
+  fecha: string;
+  horaInicio: string;
+  horaCierre: string;
   gestor: string;
 }
