@@ -85,9 +85,11 @@ const CtoContent = () => {
 
     setFormData((prev) => ({
       ...prev,
+      activeBornes: activeBornesData,
     }));
     const updatedData = await updateCtoData(fileId || "", cto || "", {
       ...formData,
+      activeBornes: activeBornesData,
     });
     setData(updatedData);
     resetForm();

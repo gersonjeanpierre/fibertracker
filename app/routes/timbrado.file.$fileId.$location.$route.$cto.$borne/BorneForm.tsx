@@ -84,7 +84,7 @@ export default function BorneForm() {
                 ctoFind.bornes[borneNumber - 1]?.onuFinal?.toString() || "",
                 10
               )
-            : 0,
+            : "",
         estadoEnCampoInicial:
           ctoFind.bornes &&
           borneNumber > 0 &&
