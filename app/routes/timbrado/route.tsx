@@ -2,34 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import {
   FileIcon,
   LayoutDashboardIcon,
-  MapPinIcon,
-  BoxIcon,
   MenuIcon,
   DatabaseIcon,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Outlet, useNavigate, useParams } from "@remix-run/react";
 
-const transformData = (data: ArrayBuffer) => {
-  // Mock implementation
-  console.log("Transforming data:", data);
-  return [];
-};
-
-const saveDataByKey = async (key: string, data: any) => {
-  // Mock implementation
-  console.log("Saving data:", key, data);
-};
-
-const getAllKeys = async () => {
-  // Mock implementation
-  return ["File 1", "File 2", "File 3"];
-};
-
 export default function Component() {
   const navigate = useNavigate();
   const params = useParams();
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeNavItem, setActiveNavItem] = useState("Dashboard");
   const sidebarRef = useRef<HTMLDivElement>(null);

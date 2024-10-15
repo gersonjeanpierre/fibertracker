@@ -105,7 +105,7 @@ export const clearData = async () => {
 export const updateCtoData = async (
   file: string,
   ctoId: string,
-  updatedData: Partial<Cto>
+  updatedData: Cto
 ) => {
   try {
     // Obtener los datos por la clave

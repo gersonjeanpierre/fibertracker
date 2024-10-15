@@ -19,22 +19,22 @@ export interface Cto {
   mcomentario: string;
   mcomentario_2: string;
   oltA: string;
-  slotA: number;
-  portA: number;
+  slotA: string;
+  portA: string;
   oltB: string;
-  slotB: number;
-  portB: number;
-  activeBornes: number[];
+  slotB: string;
+  portB: string;
+  activeBornes: Array<number>;
   bornes?: DataBornes[];
 }
 
 export interface DataBornes {
-  borne: string;
+  borne: number;
   lineIdInicial: string;
   vnoCodeInicial: string;
   olt: string;
-  slot: number;
-  port: number;
+  slot: string;
+  port: string;
   onuInicial: number;
   estadoInicial: string;
   onuFinal: number;

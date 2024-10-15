@@ -1,5 +1,5 @@
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { transformData } from "./xlsx";
 import { getAllKeys, getDataByKey, saveDataByKey } from "~/service/data-excel";
@@ -60,14 +60,24 @@ const FileContent = () => {
   return (
     <>
       <div className="mb-8">
-        <h2 className="text-3xl font-bold mb-4">File Upload</h2>
-        <Card>
-          <CardContent className="p-6">
+        <div>
+          <h1 className="text-2xl font-bold ">
+            Hola, {localStorage.getItem("gestor")}
+          </h1>
+          <p>Bienvenido a FiberTracker</p>
+        </div>
+        <Card className="mt-2">
+          <CardHeader className="py-3">
+            <CardTitle className="text-lg font-semibold">
+              Cargar archivo
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <Input
               type="file"
               onChange={handleFileUpload}
               accept=".xlsx"
-              className="mb-4"
+              className="mb-2"
             />
             <div className="flex flex-wrap gap-2">
               {keys.length === 0 ? (

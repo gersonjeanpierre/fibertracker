@@ -13,15 +13,21 @@ import { useTimbrado } from "~/context/TimbaContetext";
 import { Button } from "~/components/ui/button";
 import { useEffect, useState } from "react";
 import { updateCtoData } from "~/service/data-excel";
-import { findCto, obtenerFechaHoy, obtenerHoraActual } from "./cto-util";
-import { Cto, ExcelTimbradoCto } from "~/interface/timbrado";
-import { DataBornes } from "../../interface/timbrado";
-import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
+import {
+  findCto,
+  getFirstThreeCharacters,
+  obtenerFechaHoy,
+  obtenerHoraActual,
+} from "./cto-util";
+import { Cto, DataBornes, ExcelTimbradoCto } from "~/interface/timbrado";
+import { ComboboxForm } from "./combo";
+import { Checkbox } from "~/components/ui/checkbox";
 
 const CtoContent = () => {
   const { data, setData } = useTimbrado();
-  const fetcher = useFetcher();
   const { fileId, location, route, cto } = useParams();
+  const [isLadoAChecked, setIsLadoAChecked] = useState(false);
+  const [isLadoBChecked, setIsLadoBChecked] = useState(false);
 
   const [formData, setFormData] = useState<Cto>({
     cto: cto || "",
@@ -44,21 +50,32 @@ const CtoContent = () => {
   const activeBornes = () => {
     const bornes = [];
     if (formData.state === "SIN ACCESO") {
-      bornes.push(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+      bornes.push(...Array.from({ length: 16 }, (_, i) => i + 1)); // Agrega los 16 bornes directamente
     }
     if (formData.oltA && formData.slotA && formData.portA) {
-      bornes.push(1, 2, 3, 4, 5, 6, 7, 8);
+      bornes.push(...Array.from({ length: 8 }, (_, i) => i + 1)); // Lado A: Bornes 1-8
     }
     if (formData.oltB && formData.slotB && formData.portB) {
-      bornes.push(9, 10, 11, 12, 13, 14, 15, 16);
+      bornes.push(...Array.from({ length: 8 }, (_, i) => i + 9)); // Lado B: Bornes 9-16
     }
     return bornes;
   };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await fetcher.load("/");
-    const updatedData = await updateCtoData(fileId || "", cto || "", formData);
+    const activeBornesData: number[] = activeBornes();
+    const sinAD: DataBornes[] = sinAccesoData();
+
+    setFormData((prev) => ({
+      ...prev,
+      activeBornes: activeBornesData,
+      bornes: formData.state === "SIN ACCESO" ? sinAD : [],
+    }));
+
+    const updatedData = await updateCtoData(fileId || "", cto || "", {
+      ...formData,
+      activeBornes: activeBornesData,
+      bornes: formData.state === "SIN ACCESO" ? sinAD : [],
+    });
     setData(updatedData);
     resetForm();
   };
@@ -101,7 +118,7 @@ const CtoContent = () => {
         slotB: ctoFind.slotB || "",
         portB: ctoFind.portB || "",
         activeBornes: ctoFind.activeBornes || [],
-        bornes: [],
+        bornes: ctoFind.bornes || [],
       });
     }
   }, [cto, data, location, route]);
@@ -111,7 +128,7 @@ const CtoContent = () => {
     const bornes: DataBornes[] = [];
     for (let i = 0; i < activeBornes().length; i++) {
       bornes.push({
-        borne: formData.activeBornes[i],
+        borne: i + 1,
         lineIdInicial: "",
         vnoCodeInicial: "",
         olt: "",
@@ -127,16 +144,22 @@ const CtoContent = () => {
         potenciaCampo: "",
         lineIdFinal: "",
         vnoCodeFinal: "",
-        comentario: "",
+        comentario: formData.state,
         ctoEnCampo: "",
       });
     }
+    console.log("BORNES SIN ACCESO", bornes);
     return bornes;
   };
+
   //ExcelTimbradoCto
   const excelTimbradoDataCto = () => {
-    console.log("ACTIVOS BORNES", activeBornes());
     const excelData: ExcelTimbradoCto[] = [];
+    // if (excelData.length === 0) {
+    //   console.error("No hay datos para copiar");
+    //   return;
+    // }
+
     for (let i = 0; i < activeBornes().length; i++) {
       excelData.push({
         cto: formData.cto,
@@ -164,15 +187,41 @@ const CtoContent = () => {
         fecha: obtenerFechaHoy(),
         horaInicio: "9:00",
         horaCierre: obtenerHoraActual(),
-        gestor: "Gerson Salas",
+        gestor: localStorage.getItem("gestor") || "",
       });
     }
+
+    // Convertir excelData a un formato TSV
+    const headers = Object.keys(excelData[0]).join("\t");
+    const rows = excelData
+      .map((obj) => Object.values(obj).join("\t"))
+      .join("\n");
+    const tsvData = `${headers}\n${rows}`;
+
+    // Copiar al portapapeles
+    navigator.clipboard
+      .writeText(tsvData)
+      .then(() => {
+        console.log("Datos copiados al portapapeles");
+      })
+      .catch((err) => {
+        console.error("Error al copiar al portapapeles: ", err);
+      });
+
     return excelData;
   };
 
-  const handleCopiarExcel = () => {
+  const handleCopiarExcel = async () => {
     console.log("Copiar a excel");
     console.log(excelTimbradoDataCto());
+  };
+
+  const [isChecked, setIsChecked] = useState(false);
+
+  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setIsChecked(checked);
+    console.log(`Checkbox is now ${checked ? "checked" : "unchecked"}`);
   };
 
   return (
@@ -194,7 +243,11 @@ const CtoContent = () => {
               <Select
                 value={formData.state}
                 onValueChange={(value: string) =>
-                  setFormData((prev) => ({ ...prev, state: value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    state: value,
+                    observation: "",
+                  }))
                 }
                 required
               >
@@ -287,7 +340,9 @@ const CtoContent = () => {
               <Input
                 type="text"
                 name="cto_campo"
-                value={formData.cto_campo}
+                value={
+                  formData.state === "NO TIMBRADO" ? "" : formData.cto_campo
+                }
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
@@ -300,7 +355,9 @@ const CtoContent = () => {
               <Input
                 type="text"
                 name="divisor"
-                value={formData.divisor}
+                value={
+                  formData.divisor === "NO TIMBRADO" ? "" : formData.divisor
+                }
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
@@ -345,109 +402,156 @@ const CtoContent = () => {
               </div>
             </div>
 
-            <div className="flex mt-4">
-              <div>
-                <Label htmlFor="oltA">OLT Lado A</Label>
-                <Input
-                  id="oltA"
-                  placeholder="OLT"
-                  value={formData.oltA || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, oltA: e.target.value }))
-                  }
-                  disabled={formData.state == "SIN ACCESO"}
-                />
-              </div>
-              <div>
-                <Label htmlFor="slotA">SLOT</Label>
-                <Input
-                  id="slotA"
-                  type="number"
-                  value={formData.slotA || ""}
-                  min={0}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      slotA: Number(e.target.value),
-                    }));
-                  }}
-                  disabled={formData.state == "SIN ACCESO"}
-                />
-              </div>
-              <div>
-                <Label htmlFor="portA">PORT</Label>
-                <Input
-                  id="portA"
-                  type="number"
-                  value={formData.portA || ""}
-                  min={0}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      portA: Number(e.target.value),
-                    }));
-                  }}
-                  disabled={formData.state == "SIN ACCESO"}
-                />
-              </div>
-            </div>
-            <div className="flex mt-4">
-              <div>
-                <Label htmlFor="oltB">OLT Lado B</Label>
-                <Input
-                  id="oltB"
-                  placeholder="OLT"
-                  value={formData.oltB || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, oltB: e.target.value }))
-                  }
-                  disabled={formData.state == "SIN ACCESO"}
-                />
-              </div>
-              <div>
-                <Label htmlFor="slotB">SLOT</Label>
-                <Input
-                  id="slotB"
-                  type="number"
-                  value={formData.slotB || ""}
-                  min={0}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      slotB: Number(e.target.value),
-                    }));
-                  }}
-                  disabled={formData.state == "SIN ACCESO"}
-                />
-              </div>
-              <div>
-                <Label htmlFor="portB">PORT</Label>
-                <Input
-                  id="portB"
-                  type="number"
-                  value={formData.portB || ""}
-                  min={0}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      portB: Number(e.target.value),
-                    }));
-                  }}
-                  disabled={formData.state == "SIN ACCESO"}
-                />
-              </div>
-            </div>
-            <Button className="mt-4">Guardar</Button>
+            <Button onClick={handleSubmit}>Guardar</Button>
           </CardContent>
         </Card>
       </Form>
+      {/* <ComboboxForm /> */}
+      <Form method="post" onSubmit={handleSubmit}>
+        <Card>
+          <CardHeader>
+            <CardTitle>OLT</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="ladoA"
+                  checked={isLadoAChecked}
+                  onCheckedChange={setIsLadoAChecked}
+                />
+                <Label htmlFor="ladoA">Lado A</Label>
+              </div>
+              {isLadoAChecked && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="oltA">OLT Lado A</Label>
+                    <Input
+                      id="oltA"
+                      placeholder="OLT"
+                      value={formData.oltA || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          oltA: e.target.value,
+                        }))
+                      }
+                      disabled={formData.state == "SIN ACCESO"}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="slotA">SLOT</Label>
+                    <Input
+                      id="slotA"
+                      type="number"
+                      value={formData.slotA || ""}
+                      min={0}
+                      onChange={(e) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          slotA: e.target.value,
+                        }));
+                      }}
+                      disabled={formData.state == "SIN ACCESO"}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="portA">PORT</Label>
+                    <Input
+                      id="portA"
+                      type="number"
+                      value={formData.portA || ""}
+                      min={0}
+                      onChange={(e) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          portA: e.target.value,
+                        }));
+                      }}
+                      disabled={formData.state == "SIN ACCESO"}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="ladoB"
+                  checked={isLadoBChecked}
+                  onCheckedChange={setIsLadoBChecked}
+                />
+                <Label htmlFor="ladoB">Lado B</Label>
+              </div>
+              {isLadoBChecked && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="oltB">OLT Lado B</Label>
+                    <Input
+                      id="oltB"
+                      placeholder="OLT"
+                      value={formData.oltB || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          oltB: e.target.value,
+                        }))
+                      }
+                      disabled={formData.state == "SIN ACCESO"}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="slotB">SLOT</Label>
+                    <Input
+                      id="slotB"
+                      type="number"
+                      value={formData.slotB || ""}
+                      min={0}
+                      onChange={(e) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          slotB: e.target.value,
+                        }));
+                      }}
+                      disabled={formData.state == "SIN ACCESO"}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="portB">PORT</Label>
+                    <Input
+                      id="portB"
+                      type="number"
+                      value={formData.portB || ""}
+                      min={0}
+                      onChange={(e) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          portB: e.target.value,
+                        }));
+                      }}
+                      disabled={formData.state == "SIN ACCESO"}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <Button className="mt-4" type="submit">
+              Guardar
+            </Button>
+          </CardContent>
+        </Card>
+      </Form>
+
       <Card>
         <CardHeader>
           <CardTitle>Bornes</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Button variant="outline">1</Button>
+            {formData.activeBornes.map((borne) => (
+              <Button key={borne} variant="outline">
+                {borne}
+              </Button>
+            ))}
           </div>
           <Button id="btnClipboard" onClick={handleCopiarExcel}>
             Copiar a excel

@@ -45,7 +45,7 @@ export const transformData = (fileData: ArrayBuffer) => {
             slotB: "",
             portB: "",
             activeBornes: [],
-            timbrado: [],
+            bornes: [],
           };
         })
         .filter((cto) => cto !== null); // Filtrar los CTOs que son null

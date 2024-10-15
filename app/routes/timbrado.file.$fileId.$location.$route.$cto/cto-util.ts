@@ -34,3 +34,7 @@ export function obtenerHoraActual(): string {
 
   return `${horas}:${minutos}`;
 }
+
+export const getFirstThreeCharacters = (str: string): string => {
+  return str.substring(0, 3);
+};
