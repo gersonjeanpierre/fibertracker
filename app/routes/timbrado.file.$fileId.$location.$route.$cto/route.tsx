@@ -19,16 +19,10 @@ import { useTimbrado } from "~/context/TimbaContetext";
 import { Button } from "~/components/ui/button";
 import { useEffect, useState } from "react";
 import { updateCtoData } from "~/service/data-excel";
-import {
-  findCto,
-  getFirstThreeCharacters,
-  obtenerFechaHoy,
-  obtenerHoraActual,
-} from "./cto-util";
+import { findCto, obtenerFechaHoy, obtenerHoraActual } from "./cto-util";
 import { Cto, DataBornes, ExcelTimbradoCto } from "~/interface/timbrado";
-import { ComboboxForm } from "./combo";
 import { Checkbox } from "~/components/ui/checkbox";
-import { number } from "zod";
+import { set } from "react-hook-form";
 
 const CtoContent = () => {
   const { data, setData } = useTimbrado();
@@ -73,16 +67,27 @@ const CtoContent = () => {
     const sinAD: DataBornes[] = sinAccesoData();
     const bornes: DataBornes[] = bornesArray();
 
+    if (!formData.state) {
+      setFormData((prev) => ({
+        ...prev,
+        activeBornes: activeBornesData,
+        bornes: formData.state === "SIN ACCESO" ? sinAD : bornes,
+      }));
+
+      const updatedData = await updateCtoData(fileId || "", cto || "", {
+        ...formData,
+        activeBornes: activeBornesData,
+        bornes: formData.state === "SIN ACCESO" ? sinAD : bornes,
+      });
+      setData(updatedData);
+      resetForm();
+    }
+
     setFormData((prev) => ({
       ...prev,
-      activeBornes: activeBornesData,
-      bornes: formData.state === "SIN ACCESO" ? sinAD : bornes,
     }));
-
     const updatedData = await updateCtoData(fileId || "", cto || "", {
       ...formData,
-      activeBornes: activeBornesData,
-      bornes: formData.state === "SIN ACCESO" ? sinAD : bornes,
     });
     setData(updatedData);
     resetForm();
