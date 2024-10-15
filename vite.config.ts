@@ -3,8 +3,10 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  base: "/fibertracker/",
   plugins: [
     remix({
+      basename: "/fibertracker/",
       ssr: false,
       future: {
         v3_fetcherPersist: true,
@@ -15,4 +17,3 @@ export default defineConfig({
     tsconfigPaths(),
   ],
 });
-
