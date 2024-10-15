@@ -1,4 +1,10 @@
-import { Form, useFetcher, useParams } from "@remix-run/react";
+import {
+  Form,
+  Outlet,
+  useFetcher,
+  useNavigate,
+  useParams,
+} from "@remix-run/react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -22,6 +28,7 @@ import {
 import { Cto, DataBornes, ExcelTimbradoCto } from "~/interface/timbrado";
 import { ComboboxForm } from "./combo";
 import { Checkbox } from "~/components/ui/checkbox";
+import { number } from "zod";
 
 const CtoContent = () => {
   const { data, setData } = useTimbrado();
@@ -64,20 +71,71 @@ const CtoContent = () => {
     e.preventDefault();
     const activeBornesData: number[] = activeBornes();
     const sinAD: DataBornes[] = sinAccesoData();
+    const bornes: DataBornes[] = bornesArray();
 
     setFormData((prev) => ({
       ...prev,
       activeBornes: activeBornesData,
-      bornes: formData.state === "SIN ACCESO" ? sinAD : [],
+      bornes: formData.state === "SIN ACCESO" ? sinAD : bornes,
     }));
 
     const updatedData = await updateCtoData(fileId || "", cto || "", {
       ...formData,
       activeBornes: activeBornesData,
-      bornes: formData.state === "SIN ACCESO" ? sinAD : [],
+      bornes: formData.state === "SIN ACCESO" ? sinAD : bornes,
     });
     setData(updatedData);
     resetForm();
+  };
+
+  const bornesArray = () => {
+    const bornes: DataBornes[] = [];
+    for (let i = 0; i < activeBornes().length; i++) {
+      if (i >= 0 && i <= 7) {
+        bornes.push({
+          borne: i + 1,
+          lineIdInicial: "",
+          vnoCodeInicial: "",
+          olt: formData.oltA,
+          slot: formData.slotA,
+          port: formData.portA,
+          onuInicial: "",
+          estadoInicial: "",
+          onuFinal: "",
+          estadoEnCampoInicial: "",
+          estadoEnCampoFinal: "",
+          potenciaAntes: "",
+          potenciaDespues: "",
+          potenciaCampo: "",
+          lineIdFinal: "",
+          vnoCodeFinal: "",
+          comentario: "",
+          ctoEnCampo: "",
+        });
+      } else {
+        bornes.push({
+          borne: i + 1,
+          lineIdInicial: "",
+          vnoCodeInicial: "",
+          olt: formData.oltB,
+          slot: formData.slotB,
+          port: formData.portB,
+          onuInicial: "",
+          estadoInicial: "",
+          onuFinal: "",
+          estadoEnCampoInicial: "",
+          estadoEnCampoFinal: "",
+          potenciaAntes: "",
+          potenciaDespues: "",
+          potenciaCampo: "",
+          lineIdFinal: "",
+          vnoCodeFinal: "",
+          comentario: "",
+          ctoEnCampo: "",
+        });
+      }
+    }
+    return bornes;
   };
 
   const resetForm = () => {
@@ -216,12 +274,9 @@ const CtoContent = () => {
     console.log(excelTimbradoDataCto());
   };
 
-  const [isChecked, setIsChecked] = useState(false);
-
-  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    setIsChecked(checked);
-    console.log(`Checkbox is now ${checked ? "checked" : "unchecked"}`);
+  const navigate = useNavigate();
+  const handleBorne = (borne: string) => {
+    navigate(`./${borne}`);
   };
 
   return (
@@ -548,7 +603,11 @@ const CtoContent = () => {
         <CardContent>
           <div className="space-y-4">
             {formData.activeBornes.map((borne) => (
-              <Button key={borne} variant="outline">
+              <Button
+                key={borne}
+                variant="outline"
+                onClick={() => handleBorne(borne.toString())}
+              >
                 {borne}
               </Button>
             ))}
@@ -558,6 +617,7 @@ const CtoContent = () => {
           </Button>
         </CardContent>
       </Card>
+      <Outlet />
     </>
   );
 };

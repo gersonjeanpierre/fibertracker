@@ -153,3 +153,71 @@ export const updateCtoData = async (
     }
   }
 };
+
+export const updateCtoDataBorne = async (
+  file: string,
+  ctoId: string,
+  updatedData: DataBornes
+) => {
+  try {
+    // Obtener los datos por la clave
+    const data = (await getDataByKey(file)) as Department[];
+
+    if (!data) {
+      throw new Error(`No se encontraron datos para la clave ${file}`);
+    }
+
+    const dataUpdated = Array<Department>();
+
+    // Buscar y actualizar el CTO
+    let ctoUpdated = false;
+    data.map((department) => {
+      const rutas = department.routes.map((route) => {
+        const ctos = route.ctos.map((cto) => {
+          if (cto.cto === ctoId) {
+            ctoUpdated = true;
+
+            // Actualizar o agregar el borne en particular
+            const updatedBornes = cto.bornes ? [...cto.bornes] : [];
+            const borneIndex = updatedBornes.findIndex(
+              (b) => b.borne === updatedData.borne
+            );
+
+            if (borneIndex > -1) {
+              // Actualizar el borne existente
+              updatedBornes[borneIndex] = {
+                ...updatedBornes[borneIndex],
+                ...updatedData,
+              };
+            } else {
+              // Agregar un nuevo borne
+              updatedBornes.push(updatedData);
+            }
+
+            // Devolver el CTO actualizado
+            return { ...cto, bornes: updatedBornes };
+          }
+          return cto;
+        });
+        return { ...route, ctos };
+      });
+      dataUpdated.push({ ...department, routes: rutas });
+    });
+
+    if (!ctoUpdated) {
+      throw new Error(`No se encontró el CTO con ID ${ctoId}`);
+    }
+
+    // Guardar los datos actualizados nuevamente en IndexedDB
+    await saveDataByKey(file, dataUpdated);
+
+    return dataUpdated;
+  } catch (error) {
+    console.error("Error actualizando el CTO:", error);
+    if (error instanceof Error) {
+      throw new Error(`Error actualizando el CTO: ${error.message}`);
+    } else {
+      throw new Error(`Error actualizando el CTO: ${String(error)}`);
+    }
+  }
+};
