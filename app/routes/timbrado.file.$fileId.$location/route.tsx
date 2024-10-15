@@ -36,7 +36,7 @@ const RouteContent = () => {
 
   return (
     <>
-      <Card>
+      <Card className="">
         <CardHeader>
           <CardTitle>Route Selection</CardTitle>
         </CardHeader>
@@ -48,7 +48,7 @@ const RouteContent = () => {
             <SelectContent>
               {routeList?.map((route, index) => (
                 <SelectItem key={index} value={route.route}>
-                  RUTA #{index + 1}
+                  {route.route}
                 </SelectItem>
               ))}
             </SelectContent>

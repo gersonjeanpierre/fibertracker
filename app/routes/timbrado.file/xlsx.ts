@@ -21,16 +21,35 @@ export const transformData = (fileData: ArrayBuffer) => {
 
     // Procesar la data como lo haces habitualmente
     const rutas = transposedData.map((row) => {
-      const ctos = row.slice(3).map((cto) => ({
-        cto: String(cto),
-        state: "NO TIMBRADO",
-        observation: "",
-        cto_campo: "",
-        divisor: "",
-        mcomentario: "",
-        mcomentario_2: "",
-        timbrado: [],
-      }));
+      const ctos = row
+        .slice(3)
+        .map((cto) => {
+          // Verificar si cto es undefined o una cadena vacía
+          if (cto === undefined || cto === "") {
+            return null; // Retornar null para evitar agregar CTOs vacíos
+          }
+
+          // Crear el objeto cto si es válido
+          return {
+            cto: String(cto),
+            state: "NO TIMBRADO",
+            observation: "",
+            cto_campo: "",
+            divisor: "",
+            mcomentario: "",
+            mcomentario_2: "",
+            oltA: "",
+            slotA: "",
+            portA: "",
+            oltB: "",
+            slotB: "",
+            portB: "",
+            activeBornes: [],
+            bornes: [],
+          };
+        })
+        .filter((cto) => cto !== null); // Filtrar los CTOs que son null
+
       return {
         route: cleanCell(String(row[0])),
         gestor: cleanCell(String(row[1])),

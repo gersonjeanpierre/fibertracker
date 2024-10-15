@@ -16,12 +16,6 @@ export default function Work() {
         </Button>
         <Link to="/timbrado">
           <Button>
-            <DesktopIcon className="mr-2 h-4 w-4" />
-            Timbrado
-          </Button>
-        </Link>
-        <Link to="/timba">
-          <Button>
             <Unplug className="mr-2 h-4 w-4" />
             Timbrado
           </Button>
