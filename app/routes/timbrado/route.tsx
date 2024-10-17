@@ -45,11 +45,11 @@ export default function Component() {
   };
   console.log("params", params);
   return (
-    <div className="flex h-full w-full bg-gray-100">
+    <div className="flex  bg-gray-100">
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={` afixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:relative md:translate-x-0`}
       >

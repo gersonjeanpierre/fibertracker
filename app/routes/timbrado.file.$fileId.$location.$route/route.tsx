@@ -63,7 +63,7 @@ const CtoMono = () => {
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("class", "rounded-md shadow-md bg-white p-5")
+      // .attr("class", "rounded-md shadow-md bg-white p-5")
       .append("g")
       .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
@@ -231,8 +231,9 @@ const CtoMono = () => {
 
   return (
     <>
-      <Card>
+      <Card className="col-span-2">
         <CardContent>
+          <div ref={chartRef} className="flex justify-center"></div>
           {/* Itera sobre los estados */}
           {groupedCtos &&
             Object.keys(groupedCtos).map((state) => (
@@ -256,7 +257,6 @@ const CtoMono = () => {
             ))}
         </CardContent>
       </Card>
-      <div ref={chartRef} className="flex justify-center"></div>
       <Outlet />
     </>
   );

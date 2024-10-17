@@ -176,12 +176,13 @@ export default function BorneForm() {
         port: i >= 0 && i <= 7 ? ctoFind.portA : ctoFind.portB,
         onuInicial: "",
         estadoInicial: ctoFind.bornes[i]?.estadoInicial || "",
-        onuFinal: parseInt(ctoFind.bornes[i]?.onuFinal?.toString() || "", 10),
+        onuFinal: ctoFind.bornes[i]?.onuFinal || "",
         estadoEnCampoInicial: ctoFind.bornes[i]?.estadoEnCampoInicial || "",
         estadoEnCampoFinal: ctoFind.bornes[i]?.estadoEnCampoFinal || "",
-        potenciaAntes: parseFloat(ctoFind.bornes[i]?.potenciaAntes || ""),
-        potenciaDespues: parseFloat(ctoFind.bornes[i]?.potenciaDespues || ""),
-        potenciaCampo: parseFloat(ctoFind.bornes[i]?.potenciaCampo || ""),
+        potenciaAntes: parseFloat(ctoFind.bornes[i]?.potenciaAntes || "") || "",
+        potenciaDespues:
+          parseFloat(ctoFind.bornes[i]?.potenciaDespues || "") || "",
+        potenciaCampo: parseFloat(ctoFind.bornes[i]?.potenciaCampo || "") || "",
         lineIdFinal: ctoFind.bornes[i]?.lineIdFinal || "",
         vnoCodeFinal: ctoFind.bornes[i]?.vnoCodeFinal || "",
         comentario: ctoFind.bornes[i]?.comentario || "",
@@ -308,24 +309,24 @@ export default function BorneForm() {
             {renderInput("Line ID Final", "lineIdFinal")}
             {renderInput("VNO Code Final", "vnoCodeFinal")}
             {renderSelect("Comentario", "comentario", [
-              { value: "ok", label: "OK" },
+              { value: "OK", label: "OK" },
               {
-                value: "conector-acometida-observado-averiado",
+                value: "CONECTOR ACOMETIDA OBSERVADO/AVERIADO",
                 label: "CONECTOR ACOMETIDA OBSERVADO/AVERIADO",
               },
-              { value: "libre", label: "LIBRE" },
-              { value: "cto-sin-acceso", label: "CTO SIN ACCESO" },
+              { value: "LIBRE", label: "LIBRE" },
+              { value: "CTO SIN ACCESO", label: "CTO SIN ACCESO" },
               {
-                value: "puerto-cto-observado-averiado",
+                value: "PUERTO DE CTO OBSERVADO/AVERIADO",
                 label: "PUERTO DE CTO OBSERVADO/AVERIADO",
               },
-              { value: "no-refleja", label: "NO REFLEJA" },
+              { value: "NO REFLEJA", label: "NO REFLEJA" },
               {
-                value: "revision-casa-cliente",
+                value: "REVISION CASA CLIENTE",
                 label: "REVISION CASA CLIENTE",
               },
-              { value: "borne-atascado", label: "BORNE ATASCADO" },
-              { value: "cto-no-ubicado", label: "CTO NO UBICADO" },
+              { value: "BORNE ATASCADO", label: "BORNE ATASCADO" },
+              { value: "CTO NO UBICADO", label: "CTO NO UBICADO" },
             ])}
           </div>
 

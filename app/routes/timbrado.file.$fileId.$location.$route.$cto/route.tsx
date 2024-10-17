@@ -1,10 +1,4 @@
-import {
-  Form,
-  Outlet,
-  useFetcher,
-  useNavigate,
-  useParams,
-} from "@remix-run/react";
+import { Form, Outlet, useNavigate, useParams } from "@remix-run/react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -22,7 +16,7 @@ import { updateCtoData } from "~/service/data-excel";
 import { findCto, obtenerFechaHoy, obtenerHoraActual } from "./cto-util";
 import { Cto, DataBornes, ExcelTimbradoCto } from "~/interface/timbrado";
 import { Checkbox } from "~/components/ui/checkbox";
-import { set } from "react-hook-form";
+import { CopyIcon } from "lucide-react";
 
 const CtoContent = () => {
   const { data, setData } = useTimbrado();
@@ -168,23 +162,7 @@ const CtoContent = () => {
   useEffect(() => {
     const ctoFind = findCto(data, location, route, cto);
     if (ctoFind) {
-      setFormData({
-        cto: cto || "",
-        state: ctoFind.state || "",
-        observation: ctoFind.observation || "",
-        cto_campo: ctoFind.cto_campo || "",
-        divisor: ctoFind.divisor || "",
-        mcomentario: ctoFind.mcomentario || "",
-        mcomentario_2: ctoFind.mcomentario_2 || "",
-        oltA: ctoFind.oltA || "",
-        slotA: ctoFind.slotA || "",
-        portA: ctoFind.portA || "",
-        oltB: ctoFind.oltB || "",
-        slotB: ctoFind.slotB || "",
-        portB: ctoFind.portB || "",
-        activeBornes: ctoFind.activeBornes || [],
-        bornes: ctoFind.bornes || [],
-      });
+      setFormData(ctoFind);
     }
   }, [cto, data, location, route]);
 
@@ -286,21 +264,26 @@ const CtoContent = () => {
     navigate(`./${borne}`);
   };
 
+  const copyCto = () => {
+    navigator.clipboard.writeText(formData.cto);
+  };
+
   return (
     <>
       <Form
         method="post"
         onSubmit={handleSubmit}
-        className="col-span-2 flex gap-3 w-full"
+        className="col-span-2 flex gap-3 "
       >
         <Card className="w-1/2">
-          <CardHeader>
-            <CardTitle>Monitoring</CardTitle>
+          <CardHeader className="pb-1 flex flex-row gap-2">
+            <CardTitle className="text-xl font-bold">{formData.cto}</CardTitle>
+            <CopyIcon className="cursor-pointer" size={24} onClick={copyCto} />
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <Label htmlFor="cto">CTO</Label>
-              <Input type="text" name="cto" value={formData.cto} disabled />
+            <div>
+              {/* <Label htmlFor="cto">CTO</Label>
+              <Input type="text" name="cto" value={formData.cto} disabled /> */}
               <Label htmlFor="estado_cto">Estado CTO</Label>
               <Select
                 value={formData.state}
@@ -398,42 +381,44 @@ const CtoContent = () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <Label htmlFor="cto_campo">CTO Campo</Label>
-              <Input
-                type="text"
-                name="cto_campo"
-                value={
-                  formData.state === "NO TIMBRADO" ? "" : formData.cto_campo
-                }
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    cto_campo: e.target.value,
-                  }))
-                }
-                placeholder="CTO Campo"
-              />
-              <Label htmlFor="divisor">Divisor</Label>
-              <Input
-                type="text"
-                name="divisor"
-                value={
-                  formData.divisor === "NO TIMBRADO" ? "" : formData.divisor
-                }
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    divisor: e.target.value,
-                  }))
-                }
-                placeholder="Divisor"
-              />
+              <div className="flex gap-3">
+                <div>
+                  <Label htmlFor="cto_campo">CTO Campo</Label>
+                  <Input
+                    type="text"
+                    name="cto_campo"
+                    value={
+                      formData.state === "NO TIMBRADO" ? "" : formData.cto_campo
+                    }
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        cto_campo: e.target.value,
+                      }))
+                    }
+                    placeholder="CTO Campo"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="divisor">Divisor</Label>
+                  <Input
+                    type="text"
+                    name="divisor"
+                    value={
+                      formData.divisor === "NO TIMBRADO" ? "" : formData.divisor
+                    }
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        divisor: e.target.value,
+                      }))
+                    }
+                    placeholder="Divisor"
+                  />
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-        <Card className="w-1/2">
-          <CardContent className="mt-4">
-            <div className="space-y-4">
+            <div className="w-1/2">
               <div>
                 <Label htmlFor="mcomentario">Comentario</Label>
                 <Input
@@ -463,19 +448,14 @@ const CtoContent = () => {
                 />
               </div>
             </div>
-
-            <Button onClick={handleSubmit}>Guardar</Button>
           </CardContent>
         </Card>
-      </Form>
-      {/* <ComboboxForm /> */}
-      <Form method="post" onSubmit={handleSubmit}>
-        <Card>
+        <Card className="w-1/2">
           <CardHeader>
             <CardTitle>OLT</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space--6">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="ladoA"
@@ -600,30 +580,28 @@ const CtoContent = () => {
               Guardar
             </Button>
           </CardContent>
+          <CardHeader>
+            <CardTitle>Bornes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {formData.activeBornes.map((borne) => (
+                <Button
+                  key={borne}
+                  variant="outline"
+                  onClick={() => handleBorne(borne.toString())}
+                >
+                  {borne}
+                </Button>
+              ))}
+            </div>
+            <Button id="btnClipboard" onClick={handleCopiarExcel}>
+              Copiar a excel
+            </Button>
+          </CardContent>
         </Card>
       </Form>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Bornes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {formData.activeBornes.map((borne) => (
-              <Button
-                key={borne}
-                variant="outline"
-                onClick={() => handleBorne(borne.toString())}
-              >
-                {borne}
-              </Button>
-            ))}
-          </div>
-          <Button id="btnClipboard" onClick={handleCopiarExcel}>
-            Copiar a excel
-          </Button>
-        </CardContent>
-      </Card>
       <Outlet />
     </>
   );
